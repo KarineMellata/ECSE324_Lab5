@@ -33,22 +33,28 @@ int output_w_volume(double frequency, int time, float amplitude){
 void make_sound(double frequency){
 	int x = 0;
 	int write = 0;
+	int previous_time = 0;
 	HPS_TIM_config_t hps_tim;
 	hps_tim.tim = TIM0;
 	hps_tim.timeout = 1000000;
 	hps_tim.LD_en = 1;
 	hps_tim.INT_en = 0;
 	hps_tim.enable = 1;
+	hps_tim.current_time = 0;
 
 	HPS_TIM_config_ASM(&hps_tim); //Config timer
-		
-	while (x<=48000) {
-		write = output(frequency, x);
+	
+	while(1){	
+	if(hps_tim.current_time != previous_time) {
+		printf("%d\n",hps_tim.current_time);
+		write = output(frequency, hps_tim.current_time);
+		previous_time = hps_tim.current_time;
 		if (audio_write_data_ASM(write, write)) 
 			 x = x+1; 
-		if( x > 48000) 
-			 x = 0;
+		if( hps_tim.current_time > 48000) 
+			 hps_tim.current_time = 0;
 	}
+}
 }
 
 void make_sound_w_interrupts(double frequency, float volume){
@@ -60,19 +66,17 @@ void make_sound_w_interrupts(double frequency, float volume){
 	while (x<=48000 && break_code == 0) {
 		read_ps2_data_ASM(key_pressed1);
 		write = output_w_volume(frequency, x, volume);
-		if(*key_pressed1 == 0xF0){
-			break_code = 1;}
-		printf("%d\n", write);
-		audio_write_data_ASM(write, write);
-		if (audio_write_data_ASM(write, write)){
-			 x = x+1;}
-		if(x > 48000){
-			 x = 0;}
+		if(*key_pressed1 == 0xF0)
+			break_code = 1;
+		if (audio_write_data_ASM(write, write))
+			 x = x+1;
+		if(x > 48000)
+			 x = 0;
 }
 }
 
 
-/* MAKE WAVES*/ /* 
+/* MAKE WAVES*/  
 int main() {		
 	while (1) {
 		make_sound(100);
@@ -81,22 +85,22 @@ int main() {
 }
 
 
-*/
 
-/*CONTROL WAVES*/
+/*
+/*CONTROL WAVES
 int main() {
 	int write = 0;
 	char *key_pressed;
 	int x = 0;
 	int break_code = 0;
 	double frequency = 0.1;
-	float volume = 1;
+	float volume = 15;
 	do{
 		/* This switch statement will check for what
 		   key has just been pressed, and will
 		   play the corresponding frequency.
 		   Order of keys : A,S,D,F,J,K,L,;
-		*/
+		
 		if(read_ps2_data_ASM(key_pressed)){
 		switch(*key_pressed){
 			case 0xF0:
@@ -145,3 +149,4 @@ int main() {
 	} while(1);
 	return 0;
 }
+*/

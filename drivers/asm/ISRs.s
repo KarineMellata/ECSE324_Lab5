@@ -42,11 +42,11 @@ HPS_TIM0_ISR:
 	
 HPS_TIM1_ISR:
 	PUSH {LR}
-	MOV R0, #0x1
+	MOV R2, #0x1
 	BL HPS_TIM_clear_INT_ASM
-	LDR R0, =hps_tim1_int_flag
-	MOV R1, #1
-	STR R1, [R0]
+	LDR R2, =hps_tim1_int_flag
+	MOV R3, #1
+	STR R3, [R2]
 	POP {LR}
 	BX LR
 	

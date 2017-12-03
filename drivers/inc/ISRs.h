@@ -19,5 +19,6 @@
 	extern void FPGA_JP2_ISR();
 	extern void FPGA_PS2_DUAL_ISR();
 	extern volatile int hps_tim0_int_flag;
+	extern volatile int hps_tim1_int_flag;
 
 #endif

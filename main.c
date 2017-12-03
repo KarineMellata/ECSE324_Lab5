@@ -33,102 +33,88 @@ int output_w_volume(double frequency, int time, float amplitude){
 void make_sound(double frequency){
 	int x = 0;
 	int write = 0;
-	int previous_time = 0;
-	HPS_TIM_config_t hps_tim;
-	hps_tim.tim = TIM0;
-	hps_tim.timeout = 1000000;
-	hps_tim.LD_en = 1;
-	hps_tim.INT_en = 0;
-	hps_tim.enable = 1;
-	hps_tim.current_time = 0;
-
-	HPS_TIM_config_ASM(&hps_tim); //Config timer
-	
-	while(1){	
-	if(hps_tim.current_time != previous_time) {
-		printf("%d\n",hps_tim.current_time);
-		write = output(frequency, hps_tim.current_time);
-		previous_time = hps_tim.current_time;
-		if (audio_write_data_ASM(write, write)) 
-			 x = x+1; 
-		if( hps_tim.current_time > 48000) 
-			 hps_tim.current_time = 0;
+	int time = 0;
+	while(1){
+		write = output(frequency, time);
+		audio_write_data_ASM(write, write);
+		time = time + 1;
+		if(time > 48000){
+			time = 0;
+			}
 	}
 }
+/*
+void make_sound_w_interrupts(double frequency, float volume, double time){
+	audio_write_data_ASM(write, write);
 }
+*/
 
-void make_sound_w_interrupts(double frequency, float volume){
-	int x = 0;
-	int write = 0;
-	char *key_pressed1;
-	int break_code = 0;
-
-	while (x<=48000 && break_code == 0) {
-		read_ps2_data_ASM(key_pressed1);
-		write = output_w_volume(frequency, x, volume);
-		if(*key_pressed1 == 0xF0)
-			break_code = 1;
-		if (audio_write_data_ASM(write, write))
-			 x = x+1;
-		if(x > 48000)
-			 x = 0;
-}
-}
-
-
-/* MAKE WAVES*/  
-int main() {		
-	while (1) {
-		make_sound(100);
-}
+/* Part 1 MAKE WAVES
+int main() {	
+	make_sound(100);
 	return 0;
 }
 
+*/
 
-
-/*
-/*CONTROL WAVES
+/*CONTROL WAVES*/
 int main() {
 	int write = 0;
 	char *key_pressed;
 	int x = 0;
 	int break_code = 0;
+	int time = 0;
 	double frequency = 0.1;
-	float volume = 15;
+	float volume = 1000;
+	int_setup(1, (int[]){199});
+	int output = 0;
+
+	HPS_TIM_config_t hps_tim_t;
+	hps_tim_t.tim = TIM0;
+	hps_tim_t.timeout = 100;
+	hps_tim_t.LD_en = 1;
+	hps_tim_t.INT_en = 1;
+	hps_tim_t.enable = 1;
+	HPS_TIM_config_ASM(&hps_tim_t);
+
 	do{
 		/* This switch statement will check for what
 		   key has just been pressed, and will
 		   play the corresponding frequency.
 		   Order of keys : A,S,D,F,J,K,L,;
-		
-		if(read_ps2_data_ASM(key_pressed)){
+		*/
+		if(hps_tim0_int_flag){ 
+			hps_tim0_int_flag = 0;
+			time += 0.0001f;
+		}
+		while(read_ps2_data_ASM(key_pressed)){
 		switch(*key_pressed){
 			case 0xF0:
 				frequency = 0;
 				break;
 			case 0x1C:
-				frequency = 130.813;
+				output += output_w_volume(130.813, time, volume);
 				break;
 			case 0x1B:
-				frequency = 146.832;
+				output += output_w_volume(146.832, time, volume);
 				break;
 			case 0x23:
-				frequency = 164.814;
+				output += output_w_volume(164.814, time, volume);
 				break;
 			case 0x2B:
-				frequency = 174.614;
+				output += output_w_volume(174.614, time, volume);
 				break;
 			case 0x3B:
-				frequency = 195.998;
+				output += output_w_volume(195.998, time, volume);
 				break;
 			case 0x42:
-				frequency = 220.000;
+				output += output_w_volume(220.000, time, volume);
 				break;
 			case 0x4B:
-				frequency = 246.942;
+				output += output_w_volume(246.942, time, volume);
 				break;
 			case 0x4C:
-				frequency = 261.626;
+				output += output_w_volume(261.626, time, volume);
 				break;
 			case 0xE075:
 				frequency = 0;
@@ -143,10 +129,8 @@ int main() {
 				break;
 			}
 		}
-		if(frequency != 0.1){
-			make_sound_w_interrupts(frequency, volume);
-		}
+		audio_write_data_ASM(output, output);
 	} while(1);
 	return 0;
 }
-*/
+

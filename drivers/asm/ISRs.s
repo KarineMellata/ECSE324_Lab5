@@ -17,12 +17,16 @@
 	.global FPGA_PS2_DUAL_ISR
 	.global hps_tim0_int_flag
 	.global hps_tim1_int_flag
+	.global hps_tim2_int_flag
 
 hps_tim0_int_flag:
-	.word 0x00
+	.word 0x0
 
 hps_tim1_int_flag:
-	.word 0x00
+	.word 0x0
+
+hps_tim2_int_flag:
+	.word 0x0
 	
 A9_PRIV_TIM_ISR:
 	BX LR
@@ -32,25 +36,47 @@ HPS_GPIO1_ISR:
 	
 HPS_TIM0_ISR:
 	PUSH {LR}
+	PUSH {R1}
+
 	MOV R0, #0x1
 	BL HPS_TIM_clear_INT_ASM
+
 	LDR R0, =hps_tim0_int_flag
 	MOV R1, #1
 	STR R1, [R0]
+
+	POP {R1}
 	POP {LR}
 	BX LR
 	
 HPS_TIM1_ISR:
 	PUSH {LR}
-	MOV R2, #0x1
+	PUSH {R1}
+
+	MOV R0, #0x2
 	BL HPS_TIM_clear_INT_ASM
-	LDR R2, =hps_tim1_int_flag
-	MOV R3, #1
-	STR R3, [R2]
+
+	LDR R0, =hps_tim1_int_flag
+	MOV R1, #1
+	STR R1, [R0]
+
+	POP {R1}
 	POP {LR}
 	BX LR
 	
 HPS_TIM2_ISR:
+	PUSH {LR}
+	PUSH {R1}
+
+	MOV R0, #0x4
+	BL HPS_TIM_clear_INT_ASM
+
+	LDR R0, =hps_tim2_int_flag
+	MOV R1, #1
+	STR R1, [R0]
+
+	POP {R1}
+	POP {LR}
 	BX LR
 	
 HPS_TIM3_ISR:

@@ -19,6 +19,7 @@ float volume = 10;
 //Colors array
 int colors[6] = {0xFFFF00, 0xFF6347, 0xDC143C, 0x3CB371, 0x9400D3, 0x00FF00};
 
+/*GENERATE THE SIGNAL*/
 int output_w_volume(double frequency, int time, float amplitude){
 	float sound;
 	float decimal = frequency - (int)frequency;
@@ -28,6 +29,7 @@ int output_w_volume(double frequency, int time, float amplitude){
 	return (int)sound; //Returning sample
 }
 
+/*DRAW THE WAVES*/
 void display_waves(){
 	if(hps_tim2_int_flag){ //This timeout goes at the rate of the display of the VGA
 		//Time goes from 0 to 48000, but it can't go over 319 cause of the screen width, hence the division by 151
@@ -57,6 +59,7 @@ void display_waves(){
 	}
 } 
 
+/*MAKE THE SOUND*/
 void make_sound_w_interrupts(){
 	int i;
 	int write = 0;
@@ -174,7 +177,7 @@ void setup_timers(){
 	//DISPLAY TIMER		
 	HPS_TIM_config_t hps_tim_2;
 	hps_tim_2.tim = TIM2;
-	hps_tim_2.timeout = 7000;  //(60) frames per seconds, however keeping it at that was much too slow, so we experimentally chose 7000
+	hps_tim_2.timeout = 7000;  //60 frames per seconds, however keeping it as that was much too slow, so we experimentally chose 7000
 	hps_tim_2.LD_en = 1;
 	hps_tim_2.INT_en = 1;
 	hps_tim_2.enable = 1;
@@ -189,7 +192,7 @@ int main() {
 	setup_timers();
 	while(1){
 		handle_keyboard(); //Do the keyboard
-		display_waves(); //Do the displaying
+		display_waves(); //Do the VGA displaying
 	}
 	return 0;
 }
